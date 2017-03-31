@@ -5,12 +5,14 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -49,15 +51,27 @@ public class NerdLauncherFragment extends ListFragment {
 
         ArrayAdapter<ResolveInfo> adapter = new ArrayAdapter<ResolveInfo>(
                 getActivity(), android.R.layout.simple_list_item_1, activities) {
-            public View getView(int pos, View convertView, ViewGroup parent) {
-                View v = super.getView(pos, convertView, parent);
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                if (convertView == null) {
+                    convertView = getActivity().getLayoutInflater().inflate(R.layout.list_item, null);
+                }
 
-                TextView tv = (TextView) v;
-                ResolveInfo ri = getItem(pos);
+                ResolveInfo ri = getItem(position);
                 PackageManager pm = getActivity().getPackageManager();
+
+                // APP icon
+                if (ri.loadIcon(pm) != null) {
+                    ImageView iv = (ImageView) convertView.findViewById(R.id.item_appicon);
+                    iv.setImageDrawable(ri.loadIcon(pm));
+                }
+
+                // APP name
+                TextView tv = (TextView) convertView.findViewById(R.id.item_appname);
                 tv.setText(ri.loadLabel(pm));
 
-                return v;
+                return convertView;
             }
         };
 
